@@ -13,6 +13,7 @@
 
         function button1Pressed() {
             doInsert();
+            formclear();
         }
 
         async function doInsert() {
@@ -23,8 +24,21 @@
             var objects = await osql.connect(sql);
             console.log(objects);
 
+            // userid = '';
+            // tweet  = '';　実行順でできない？
+            
             document.getElementById('result').innerHTML = "tweetしました";
         }
+
+        async function formclear(){
+            var userid = document.getElementById('tf1');
+            var tweet = document.getElementById('tf2');
+
+            userid.value = '';
+            tweet.value  = '';
+        }
+            
+
     </script>
 
 </head>
