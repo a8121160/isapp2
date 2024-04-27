@@ -15,6 +15,10 @@
             doSelect();
         }
 
+        function button2Pressed() {
+            dosearch();
+        }
+
         async function doSelect() {
             var sql = 'select * from Tweets order by time desc limit 20';
             var objects = await osql.connect(sql);
@@ -28,14 +32,34 @@
             html = html + '</ul>';
             document.getElementById('result').innerHTML = html;
         }
+
+        async function dosearch() {
+            var tweet = document.getElementById('tf').value;
+            var sql = 'select * from Tweets where tweet like' +'"'+ tweet +'"';
+            var objects = await osql.connect(sql);
+            console.log(objects);
+            var html = '';
+            html = html + '<ul>';
+            for (var i = 0; i < objects.length; i++) {
+                var object = objects[i];
+                html = html + '<li>' + object.id + ',' + object.name + ',' + object.tweet + ',' + object.time + '</li>';
+            }
+            html = html + '</ul>';
+            document.getElementById('result').innerHTML = html;
+        }
+
     </script>
+
+        
 
 </head>
 
 <body>
     <h1>Tweets</h1>
     <p>ツイート一覧</p>
-    <button onclick="button1Pressed()">X</button>
+    <button onclick="button1Pressed()">X</button><br>
+    <input id="tf" type="textfield">
+    <button onclick="button2Pressed()">検索</button>
     <hr>
     <p id="result">xxxx</p>
 </body>
