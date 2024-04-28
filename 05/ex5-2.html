@@ -9,8 +9,11 @@
     <script type="text/javascript" src="../lib/osql.js"></script>
 
     <script>
+        var x;
         $().ready(function (){
             doSelect();
+            x = 0;
+            setInterval(doSelect, 2000);
         });
 
         osql.requireLogin();//すべてのページに入れる．google認証をして，osql.connect()や，osql.getMe()を使えるようにしてくれる．
@@ -24,6 +27,8 @@
         function button2Pressed() {
             doSelect();
         }
+
+        
 
         async function doSelect() {
             var sql = 'select * from Tweets order by time desc limit 20';
