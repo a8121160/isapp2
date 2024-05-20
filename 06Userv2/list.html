@@ -15,6 +15,13 @@
             execSelect();
         });
 
+        async function buttonPressed(){
+            var deleteUserid = document.getElementById('tf').value;
+            var sql = `delete from Users where id = "${deleteUserid}"`;
+            var objects = await osql.connect(sql);
+            execSelect()
+        }
+
         async function execSelect() {
             var sql = 'select * from Users';
             var objects = await osql.connect(sql);
@@ -38,7 +45,10 @@
 
 <body>
     <h1>Users</h1>
+    ID:<input id="tf" value="" type="textfield">
+    <button onclick="buttonPressed()">削除</button>
     <p id="result">xxxx</p>
+    <br>
 </body>
 
 </html>
