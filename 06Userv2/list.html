@@ -13,14 +13,19 @@
 
         $(document).ready(function () {
             execSelect();
+            
         });
 
-        async function buttonPressed(){
-            var deleteUserid = document.getElementById('tf').value;
-            var sql = `delete from Users where id = "${deleteUserid}"`;
-            var objects = await osql.connect(sql);
-            execSelect()
+        async function buttonPressed(userid){
+            var ans = window.confirm("本当にいいんですね？"+userid);
+                if(ans == true){
+                    var sql = `delete from Users where id = "${userid}"`;
+                    var objects = await osql.connect(sql);
+                    execSelect()  
+                }execSelect() 
         }
+        
+        
 
         async function execSelect() {
             var sql = 'select * from Users';
@@ -31,9 +36,11 @@
             for (var i = 0; i < objects.length; i++) {
                 html = html + '<tr>';
                 var object = objects[i];
+                var userid = object.id;
                 html = html + '<td>' + object.id + '</td>';
                 html = html + '<td>' + object.name + '</td>';
                 html = html + '<td>' + '<a href="update.html?userid=' + object.id + '">変更</a>' + '</td>';
+                html += '<td><button onclick="buttonPressed(\'' + userid + '\')">削除</button></td>';
                 html = html + '</tr>';
             }
             html = html + '</table>';
@@ -44,9 +51,7 @@
 </head>
 
 <body>
-    <h1>Users</h1>
-    ID:<input id="tf" value="" type="textfield">
-    <button onclick="buttonPressed()">削除</button>
+    <h1>Users</h1>    
     <p id="result">xxxx</p>
     <br>
 </body>
