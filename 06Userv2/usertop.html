@@ -20,11 +20,17 @@
             document.getElementById('welcome').innerHTML='ようこそ'+ name+'さん';
         }
 
-        async function buttonPressed() {
+        async function buttonPressed1() {
             var html = 'update.html';
             html = html +'?userid='+sessionStorage.getItem('userid');
             location.href = html;
         }
+        async function buttonPressed2() {
+            var html = 'tweets.html';
+            html = html+ '?userid='+sessionStorage.getItem('userid');
+            location.href = html;
+        }
+
     </script>
 
     
@@ -34,9 +40,10 @@
 <body>
     <h1>ユーザトップ</h1>
     <p id="welcome">ようこそxxさん</p>
-    <button onclick="buttonPressed()">ユーザー情報変更</button>
+    <button onclick="buttonPressed1()">ユーザー情報変更</button>
     <hr>
-
+    <button onclick="buttonPressed2()">ツイート一覧</button>
+    
 </body>
 
 </html>
