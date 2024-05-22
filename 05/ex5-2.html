@@ -33,7 +33,6 @@
         async function doSelect() {
             var sql = 'select * from Tweets order by time desc limit 20';
             var objects = await osql.connect(sql);
-            console.log(objects);
             var html = '';
             html = html + '<ul>';
             for (var i = 0; i < objects.length; i++) {

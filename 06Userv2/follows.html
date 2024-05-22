@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <script type="text/javascript" src="../lib/jquery.min.js"></script>
+    <script type="text/javascript" src="../lib/osql.js"></script>
+
+    <script>
+        osql.requireLogin();//すべてのページに入れる．google認証をして，osql.connect()や，osql.getMe()を使えるようにしてくれる．
+        $().ready(function () {
+            init();
+            execSelect();
+        })
+
+        function init() {
+            var name = sessionStorage.getItem('username');
+            document.getElementById('welcome').innerHTML='ようこそ'+ name+'さん';
+        }
+
+        async function buttonPressed(i,userid){
+            var name = osql.getParam('userid');
+            // var sql = `insert into Follows (fromid, toid) values("${name}", "${userid}");`;
+            // await osql.connect(sql);
+            var buttonid= 'button'+i;
+            document.getElementById(buttonid).innerHTML='フォロー済';
+            //disabled 知らなかった
+            document.getElementById(buttonid).disabled = true;
+        }
+
+
+        async function execSelect() {
+            var username = sessionStorage.getItem('username');
+            var sql = 'select * from Users';
+            var objects = await osql.connect(sql);
+            var html ='<table border="1">';
+            html = html +'<tr><td>id</td><td>name</td><td></td></tr>';
+            for (var i = 0; i < objects.length; i++) {
+                var object = objects[i];
+                var userid = object.id;
+                if(username != object.name){
+                    html = html + '<tr>';
+                    html = html + '<td>' + object.id + '</td>';
+                    html = html + '<td>' + object.name + '</td>';
+                    //二つの引数の渡し方がわからなかったから調べた。
+                    html = html + `<td><button id="button${i}" onclick="buttonPressed(${i}, '${userid}')">フォロー</button></td>`;
+                    html = html + '</tr>';
+                }
+            }
+            html = html + '</table>';
+            document.getElementById('result').innerHTML = html;
+        }
+    </script>
+
+</head>
+
+<body>
+
+<h1>Follow</h1>
+<p id="welcome">ようこそxxさん</p>
+<p id="result">aa</p>
+
+</body>
+
+</html> 

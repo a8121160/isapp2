@@ -30,6 +30,11 @@
             html = html+ '?userid='+sessionStorage.getItem('userid');
             location.href = html;
         }
+        async function buttonPressed3() {
+            var html = 'follows.html';
+            html = html+ '?userid='+sessionStorage.getItem('userid');
+            location.href = html;
+        }
 
     </script>
 
@@ -41,8 +46,12 @@
     <h1>ユーザトップ</h1>
     <p id="welcome">ようこそxxさん</p>
     <button onclick="buttonPressed1()">ユーザー情報変更</button>
-    <hr>
+    <p></p>
     <button onclick="buttonPressed2()">ツイート一覧</button>
+    <p></p>
+    <button onclick="buttonPressed3()">フォローする</button>
+    <hr>
+    
     
 </body>
 
