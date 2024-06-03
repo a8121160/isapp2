@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html>
 
 <head>
@@ -10,82 +9,72 @@
 
     <script>
         var x;
-        $().ready(function (){
-            execSelect()
-            doSelect();
+        var intervalId= null;
+        $().ready(function () {
+            execSelect(); 
             x = 0;
-            setInterval(doSelect, 2000);
+           intervalId=setInterval(doSelect, 2000);
         });
 
-        osql.requireLogin();//すべてのページに入れる．google認証をして，osql.connect()や，osql.getMe()を使えるようにしてくれる．
-    
+        osql.requireLogin(); 
+
         function button1Pressed() {
-            doInsert();
+            doInsert(); 
             formclear();
             doSelect();
         }
 
         function button2Pressed() {
-            doSelect();
+            doSelect(); 
         }
-
-        function button2Pressed() {
+        function button3Pressed() {
             doSelect2();
-        }
-
-        
-
-        async function doSelect() {
-            var sql = 'select * from Tweets join Follows t.userid=f.toid where f.fromid = '${userid}' order by time desc limit 20';
-            await osql.connect(sql);
-            console.log(objects);
-            var html = '';
-            html = html + '<ul>';
-            for (var i = 0; i < objects.length; i++) {
-                var object = objects[i];
-                html = html + '<li>' + object.name + ',' + object.tweet + ',' + object.time + '</li>';
-            }
-            html = html + '</ul>';
-            document.getElementById('result2').innerHTML = html;
+            clearInterval(intervalId);
         }
 
         async function doSelect() {
             var sql = 'select * from Tweets order by time desc limit 20';
             var objects = await osql.connect(sql);
-            console.log(objects);
-            var html = '';
-            html = html + '<ul>';
+            var html = '<ul>';
             for (var i = 0; i < objects.length; i++) {
                 var object = objects[i];
-                html = html + '<li>' + object.name + ',' + object.tweet + ',' + object.time + '</li>';
+                html += '<li>' + object.name + ', ' + object.tweet + ', ' + object.time + '</li>';
             }
-            html = html + '</ul>';
+            html += '</ul>';
             document.getElementById('result2').innerHTML = html;
         }
 
+        async function doSelect2() {
+            var userid = osql.getParam('userid');
+            var sql = `select Tweets.name, Tweets.tweet, Tweets.time 
+                        from Tweets
+                        inner join Users on Tweets.name = Users.id 
+                        inner join Follows on Users.id = Follows.toid 
+                        where Follows.fromid="${userid}" `;
+            var objects = await osql.connect(sql);
+            var html = '<ul>';
+            for (var i = 0; i < objects.length; i++) {
+                var object = objects[i];
+                html += '<li>' + object.name + ', ' + object.tweet + ', ' + object.time + '</li>';
+            }
+            html += '</ul>';
+            document.getElementById('result2').innerHTML = html;
+        }
 
         async function doInsert() {
             var userid = document.getElementById('tf1').value;
             var tweet = document.getElementById('tf2').value;
-
             var sql = `insert into Tweets (name, tweet, time) values("${userid}", "${tweet}", now());`;
             var objects = await osql.connect(sql);
             console.log(objects);
-
-            // userid = '';
-            // tweet  = '';　実行順でできない？
-
-            document.getElementById('result').innerHTML = "tweetしました";
+            document.getElementById('result').innerHTML = "Tweetしました";
         }
 
-        async function formclear(){
-            var userid = document.getElementById('tf1');
-            var tweet = document.getElementById('tf2');
-
-            userid.value = '';
-            tweet.value  = '';
+        async function formclear() {
+            document.getElementById('tf1').value = '';
+            document.getElementById('tf2').value = '';
         }
-            
+
         async function execSelect() {
             var userid = osql.getParam('userid');
             var sql = `select * from Users where id="${userid}";`;
@@ -95,10 +84,8 @@
                 return;
             }
             var user = objects[0];
-            console.log(user)
             document.getElementById('tf1').value = user.id;
         }
-
     </script>
 
 </head>
@@ -106,15 +93,15 @@
 <body>
     <h1>Tweets</h1>
     <br>
-    名前:<input id="tf1" value="userid" type="textfield">
+    名前: <input id="tf1" type="textfield" value="userid">
     <br>
-    tweet:<input id="tf2" type="textfield">
-    <button onclick="button1Pressed()">tweet</button>
+    tweet: <input id="tf2" type="textfield">
+    <button onclick="button1Pressed()">ツイート</button>
     <p id="result"></p>
     <br>
     <p>ツイート一覧</p>
-    <button onclick="button2Pressed()">X</button>
-    <button onclick="button3Pressed()">フォロワーのツイート</button>
+    <button onclick="button2Pressed()">全てのツイート</button>
+    <button onclick="button3Pressed()">フォローしている人のツイート</button>
     <hr>
     <p id="result2"></p>
 </body>

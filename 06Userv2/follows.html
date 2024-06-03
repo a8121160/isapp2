@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html>
 
 <head>
@@ -9,43 +8,80 @@
     <script type="text/javascript" src="../lib/osql.js"></script>
 
     <script>
-        osql.requireLogin();//すべてのページに入れる．google認証をして，osql.connect()や，osql.getMe()を使えるようにしてくれる．
+        osql.requireLogin(); // Google認証を要求する
+
         $().ready(function () {
             init();
             execSelect();
-        })
+        });
 
         function init() {
             var name = sessionStorage.getItem('username');
-            document.getElementById('welcome').innerHTML='ようこそ'+ name+'さん';
+            document.getElementById('welcome').innerHTML = 'ようこそ' + name + 'さん';
         }
 
-        async function buttonPressed(i,userid){
+        async function toggleFollow(i, userid) {
             var name = osql.getParam('userid');
-            // var sql = `insert into Follows (fromid, toid) values("${name}", "${userid}");`;
-            // await osql.connect(sql);
-            var buttonid= 'button'+i;
-            document.getElementById(buttonid).innerHTML='フォロー済';
-            //disabled 知らなかった
-            document.getElementById(buttonid).disabled = true;
+            var buttonid = 'button' + i;
+            var button = document.getElementById(buttonid);
+
+            if (button.innerHTML === 'フォロー済') {
+                // フォロー解除
+                var sql = `delete from Follows where fromid="${name}" and toid="${userid}";`;
+                await osql.connect(sql);
+                button.innerHTML = 'フォロー';
+                button.disabled = false;
+            } else {
+                // フォロー
+                var sql = `insert into Follows (fromid, toid) values("${name}", "${userid}");`;
+                await osql.connect(sql);
+                button.innerHTML = 'フォロー済';
+                button.disabled = true;
+            }
         }
 
+        async function showFollowedUsers() {
+            var username = sessionStorage.getItem('username');
+            var user = await osql.connect(`select * from Users where name="${username}"`);
+            var userId = user[0].id;
+            
+            var sql = `select Users.id, Users.name 
+                        from Users 
+                        inner join Follows on Users.id = Follows.toid 
+                        where Follows.fromid="${userId}"`;
+            var followedUsers = await osql.connect(sql);
+            var html = '<ul>';
+            for (var i = 0; i < followedUsers.length; i++) {
+                var user = followedUsers[i];
+                html += '<li>' + user.id + ': ' + user.name + ' <button onclick="toggleFollow(' + i + ', \'' + user.id + '\')">フォロー解除</button></li>';
+            }
+            html += '</ul>';
+            document.getElementById('followedUsers').innerHTML = html;
+        }
 
         async function execSelect() {
             var username = sessionStorage.getItem('username');
+            var user = await osql.connect(`select * from Users where name="${username}"`);
+            //自分だけ。一行
+            var userId = user[0].id;
+            var follows = await osql.connect(`select * from Follows where fromid="${userId}"`);
+            var followedIds = follows.map(follow => follow.toid);
             var sql = 'select * from Users';
             var objects = await osql.connect(sql);
-            var html ='<table border="1">';
-            html = html +'<tr><td>id</td><td>name</td><td></td></tr>';
+            var html = '<table border="1">';
+            html = html + '<tr><td>id</td><td>name</td><td></td></tr>';
             for (var i = 0; i < objects.length; i++) {
                 var object = objects[i];
                 var userid = object.id;
-                if(username != object.name){
+                if (username != object.name) {
                     html = html + '<tr>';
                     html = html + '<td>' + object.id + '</td>';
                     html = html + '<td>' + object.name + '</td>';
-                    //二つの引数の渡し方がわからなかったから調べた。
-                    html = html + `<td><button id="button${i}" onclick="buttonPressed(${i}, '${userid}')">フォロー</button></td>`;
+                    if (followedIds.includes(userid)) {
+                        html = html + `<td><button id="button${i}" disabled>フォロー済</button></td>`;
+                    } else {
+                        html = html + `<td><button id="button${i}" onclick="toggleFollow(${i}, '${userid}')">フォロー</button></td>`;
+                    }
                     html = html + '</tr>';
                 }
             }
@@ -57,11 +93,11 @@
 </head>
 
 <body>
-
-<h1>Follow</h1>
-<p id="welcome">ようこそxxさん</p>
-<p id="result">aa</p>
-
+    <h1>Follow</h1>
+    <p id="welcome">ようこそxxさん</p>
+    <p id="result"></p>
+    <button onclick="showFollowedUsers()">フォローしている人の一覧</button>
+    <p id="followedUsers"></p>
 </body>
 
-</html> 
+</html>
